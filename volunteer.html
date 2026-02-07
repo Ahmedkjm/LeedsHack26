@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volunteer | Delivery Tasks</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root { --accent: #FF8400; --bg: #f4f4f4; }
+        body { background-color: var(--bg); font-family: 'Segoe UI', sans-serif; }
+        .task-card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; border-left: 6px solid var(--accent); transition: 0.3s; }
+        .task-card:hover { transform: translateX(5px); }
+        .btn-accept { background-color: var(--accent); color: white; border: none; font-weight: bold; }
+        .empty-state { text-align: center; padding: 50px; color: #888; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-light bg-white mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="login_signup.html">
+                <!-- This creates button object which I have set to the logo and will take to home page-->
+                <img src="logo.png.png" alt="us2banks Logo" height="55"> 
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <!-- This allows me to add the buttons using bootstrap commands to align them -->
+                    <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
+                    <li class="nav-item"><a class="nav-link btn btn-custom text-white px-3 ms-2" href="#">Logout</a></li>
+                    <!-- Example, px here would add space between border of button and text inside button so its not squished-->
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2 class="fw-bold mb-4">Open Requests</h2>
+        <div id="taskList">
+            </div>
+    </div>
+
+    <script>
+        function loadTasks() {
+            const taskList = document.getElementById('taskList');
+            const db = JSON.parse(localStorage.getItem('foodRequests')) || [];
+
+            if (db.length === 0) {
+                taskList.innerHTML = '<div class="empty-state"><h3>🎉 No pending requests</h3><p>Food banks are currently stocked up!</p></div>';
+                return;
+            }
+
+            // Reverse so newest is at top
+            taskList.innerHTML = db.reverse().map(task => `
+                <div class="task-card shadow-sm d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="fw-bold mb-0">${task.qty}x ${task.item}</h5>
+                        <small class="text-muted">Requested at: ${task.timestamp}</small>
+                    </div>
+                    <button class="btn btn-accept" onclick="acceptTask(${task.id})">Accept Order</button>
+                </div>
+            `).join('');
+        }
+
+        function acceptTask(id) {
+            let db = JSON.parse(localStorage.getItem('foodRequests')) || [];
+            // Remove the task once accepted (simulating moving it to a volunteer's personal list)
+            db = db.filter(t => t.id !== id);
+            localStorage.setItem('foodRequests', JSON.stringify(db));
+            alert("Order accepted! Check your navigation for the route.");
+            loadTasks();
+        }
+
+        // LIVE UPDATE: Listen for changes in localStorage from other tabs
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'foodRequests') {
+                loadTasks();
+            }
+        });
+
+        // Initial load
+        loadTasks();
+    </script>
+</body>
+</html>
